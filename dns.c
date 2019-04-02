@@ -453,7 +453,7 @@ int DoListenIPv4(int port)
 		si_me.sin_addr.s_addr = htonl(INADDR_ANY);
 		if (bind(listenSocket, (struct sockaddr*)&si_me, sizeof(si_me)) == -1)
 		{
-			printf("%s socket bind %d fail\n", __func__, port);
+			printf("%s socket bind %d fail(%s)\n", __func__, port, strerror(errno));
             listenSocket = -1;
 			return -2;
 		}
