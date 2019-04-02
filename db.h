@@ -140,7 +140,7 @@ public:
     if (stat1W.reliability > 0.45 && stat1W.count > 16) return true;
     if (stat1M.reliability > 0.35 && stat1M.count > 32) return true;
     
-    printf("not good for fucking stat parameters\n");
+    printf("not good for stat parameters\n");
     return false;
   }
   int GetBanTime() const {
