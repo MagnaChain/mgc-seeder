@@ -405,9 +405,8 @@ int DoListenIPv6(int port)
 	if (listenSocket == -1)
     {
 		listenSocket = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
-		if (listenSocket == -1)
-		{
-			listenSocket = -1;
+		if (listenSocket == -1) {
+			listenSocket = -1;// why this code in here, same var as if condition?
 			return -1;
 		}
         
@@ -423,6 +422,7 @@ int DoListenIPv6(int port)
         if (bind(listenSocket, (struct sockaddr*)&si_me, sizeof(si_me)) != 0)
 		{
 			printf("%s socket bind %d fail(%s)\n", __func__, port, strerror(errno));
+            listenSocket = -1;
 			return -2;
 		}
 		else
@@ -437,8 +437,7 @@ int DoListenIPv4(int port)
 	if (listenSocket == -1)
 	{
 		listenSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-		if (listenSocket == -1)
-		{
+		if (listenSocket == -1) {
 			listenSocket = -1;
 			return -1;
 		}
@@ -455,6 +454,7 @@ int DoListenIPv4(int port)
 		if (bind(listenSocket, (struct sockaddr*)&si_me, sizeof(si_me)) == -1)
 		{
 			printf("%s socket bind %d fail\n", __func__, port);
+            listenSocket = -1;
 			return -2;
 		}
 		else
