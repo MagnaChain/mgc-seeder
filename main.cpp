@@ -189,9 +189,14 @@ void ParseCommandLine(int argc, char **argv, MCDnsSeedOpts* opts) {
     if (showHelp) fprintf(stderr, help, argv[0]);
 }
 
+std::string GetBranchDBMapKey(MCDnsSeedOpts& opts) {
+    std::string key = opts.branchid + (opts.fUseTestNet ? std::string("testnet") : std::string(""));
+    return key;
+}
+
 void AddNewDB(MCAddrDB &db)
 {
-    g_mapBranchDB[db.pOpts->branchid] = db;
+    g_mapBranchDB[GetBranchDBMapKey(*db.pOpts)] = db;
     g_mapHostDB[db.pOpts->host] = db;
 }
 
@@ -586,26 +591,10 @@ int main(int argc, char **argv) {
 
   bool fDNS = true;
   //TODO: Check if no ns option then will not open dns thread 
-  //if (!g_defaultOpts.ns) {
-  //  printf("No nameserver set. Not starting DNS server.\n");
-  //  fDNS = false;
-  //}
-  //if (fDNS && !g_defaultOpts.host) {
-  //  fprintf(stderr, "No hostname set. Please use -h.\n");
-  //  exit(1);
-  //}
-  //if (fDNS && !g_defaultOpts.mbox) {
-  //  fprintf(stderr, "No e-mail address set. Please use -m.\n");
-  //  exit(1);
-  //}
 
   MCAddrDB defaultdb(&g_defaultOpts);
   //defaultdb.LoadDBData();
   //AddNewDB(defaultdb);
-
-
-  //多个dnsseed
-  // main branch
 
   if (g_configgilename == nullptr)
   {
@@ -630,9 +619,8 @@ int main(int argc, char **argv) {
   for (int i=0; i < vecSize; i++)
   {
       MCDnsSeedOpts* opts = vectDNSSeeds[i];
-      if (g_mapBranchDB.count(opts->branchid))
-      {
-          printf("duplicate branch id %s\n", opts->branchid.c_str());
+      if (g_mapBranchDB.count(GetBranchDBMapKey(*opts))){
+          printf("duplicate branch id %s %s\n", opts->branchid.c_str(), opts->fUseTestNet?"testnet":"");
           continue;
       }
       printf("running branch %s\n", opts->branchid.c_str());
