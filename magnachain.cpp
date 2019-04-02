@@ -27,6 +27,7 @@ class MCNode {
 
   const string branchid;
   unsigned char pchMessageStart[4];
+  const bool fUsetestnet;
 
   int GetTimeout() {
       if (you.IsTor())
@@ -83,7 +84,7 @@ class MCNode {
     int64 nLocalServices = 0;
     MCAddress me(MCService("0.0.0.0"));
     BeginMessage("version");
-    int nBestHeight = GetRequireHeight();
+    int nBestHeight = GetRequireHeight(this->fUsetestnet);
     string ver = "/magnachain-seeder:0.01/";
     vSend << PROTOCOL_VERSION << nLocalServices << nTime << this->branchid << you << me << nLocalNonce << ver << nBestHeight;
     EndMessage();
@@ -212,8 +213,8 @@ class MCNode {
   }
   
 public:
-  MCNode(const MCService& ip, vector<MCAddress>* vAddrIn, const string &strBranchId, unsigned char* pchMsgStart)
-      : you(ip), nHeaderStart(-1), nMessageStart(-1), vAddr(vAddrIn), ban(0), doneAfter(0), nVersion(0), branchid(strBranchId){
+  MCNode(const MCService& ip, vector<MCAddress>* vAddrIn, const string &strBranchId, unsigned char* pchMsgStart, bool fTestNet)
+      : you(ip), nHeaderStart(-1), nMessageStart(-1), vAddr(vAddrIn), ban(0), doneAfter(0), nVersion(0), branchid(strBranchId), fUsetestnet(fTestNet){
     vSend.SetType(SER_NETWORK);
     vSend.SetVersion(0);
     vRecv.SetType(SER_NETWORK);
@@ -292,9 +293,9 @@ public:
   }
 };
 
-bool TestNode(const MCService &cip, int &ban, int &clientV, std::string &clientSV, int &blocks, vector<MCAddress>* vAddr, const std::string &strBranchId, unsigned char* pchMessageStart) {
+bool TestNode(const MCService &cip, int &ban, int &clientV, std::string &clientSV, int &blocks, vector<MCAddress>* vAddr, const std::string &strBranchId, unsigned char* pchMessageStart, bool fUseTestnet) {
   try {
-    MCNode node(cip, vAddr, strBranchId, pchMessageStart);
+    MCNode node(cip, vAddr, strBranchId, pchMessageStart, fUseTestnet);
     bool ret = node.Run();
     if (!ret) {
       ban = node.GetBan();
@@ -311,15 +312,3 @@ bool TestNode(const MCService &cip, int &ban, int &clientV, std::string &clientS
     return false;
   }
 }
-
-/*
-int main(void) {
-  MCService ip("magnachain.sipa.be", 8333, true);
-  vector<MCAddress> vAddr;
-  vAddr.clear();
-  int ban = 0;
-  bool ret = TestNode(ip, ban, vAddr);
-  printf("ret=%s ban=%i vAddr.size()=%i\n", ret ? "good" : "bad", ban, (int)vAddr.size());
-}
-*/
-

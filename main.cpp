@@ -24,8 +24,6 @@ static const std::string strDefaultOpts = "defaultoptions";
 
 using namespace std;
 
-bool fTestNet = false;
-
 typedef std::map<std::string, MCAddrDB> MAP_BRANCH_DB;
 typedef std::map<std::string, MCAddrDB> MAP_HOST_DB;
 MAP_BRANCH_DB g_mapBranchDB;
@@ -221,7 +219,7 @@ extern "C" void* ThreadCrawler(void* data) {
       res.nHeight = 0;
       res.strClientV = "";
       bool getaddr = res.ourLastSuccess + 86400 < now;
-      res.fGood = TestNode(res.service, res.nBanTime, res.nClientV, res.strClientV, res.nHeight, getaddr ? &addr : NULL, pOpts->branchid, pOpts->pchMessageStart);
+      res.fGood = TestNode(res.service, res.nBanTime, res.nClientV, res.strClientV, res.nHeight, getaddr ? &addr : NULL, pOpts->branchid, pOpts->pchMessageStart, pOpts->fUseTestNet);
     }
     pDB->ResultMany(ips);
     pDB->Add(addr);
@@ -490,8 +488,8 @@ extern "C" void* ThreadStats(void*pData) {
 extern "C" void* ThreadSeeder(void*pData) {
   MCAddrDB* pDB = (MCAddrDB*)pData;
   RenameThread(strprintf("Seeder_%s", pDB->pOpts->branchid.substr(0, 8).c_str()).c_str());
-  if (!fTestNet){
-    //db.Add(MCService("kjy2eqzk4zwi5zd3.onion", 8333), true);
+  if (!pDB->pOpts->fUseTestNet){
+    //db.Add(MCService("kjy2eqzk4zwi5zd3.onion", 8833), true);
   }
   do {
     for (int i=0; i < pDB->pOpts->seeds.size(); i++) {
@@ -537,11 +535,6 @@ void InitCommonOptions(int argc, char **argv)
         }
     }
     //defaultOpts.InitMessageStart();
-    if (g_defaultOpts.fUseTestNet)
-    {
-        printf("Using testnet.\n");
-        fTestNet = true;
-    }
 }
 
 //注意 最后调用的fend 传 true
@@ -613,56 +606,7 @@ int main(int argc, char **argv) {
 
   //多个dnsseed
   // main branch
-  /*
 
-  // dns threads share by all branch.
-  if (fDNS) {
-      StartDNS(defaultdb);
-  }
-  {
-      MCDnsSeedOpts* pOpts = new MCDnsSeedOpts();
-      pOpts->branchid = "main";
-      pOpts->defaultport = !fTestNet ? 8833 : 18833;
-      pOpts->nThreads = 33; //default 96
-      pOpts->fUseTestNet = fTestNet;
-
-      pOpts->host = "seed.celllinkseed.io";// -h
-      pOpts->ns = "dns.celllinkseed.io";// -n
-      pOpts->mbox = "alibuybuy@yandex.com"; // -m
-
-      pOpts->seeds.push_back("120.92.85.97");
-      //pOpts->seeds.push_back("1.2.3.4");// test data
-
-      pOpts->InitMessageStart();
-
-      MCAddrDB* pdb = new MCAddrDB(pOpts);
-      pdb->LoadDBData();
-      AddNewDB(*pdb);
-      StartSeederThread(*pdb, false);
-  }
-  // branch 1
-  {
-      MCDnsSeedOpts* pOpts = new MCDnsSeedOpts();
-      pOpts->branchid = "9aa3965c779b2611c7ffd43d7c85a9a06bd811f11a45eb6c35f71c2bfe36a99c";
-      pOpts->defaultport = 28833;// TODO: 
-      pOpts->nThreads = 33; //default 96
-      pOpts->fUseTestNet = fTestNet;
-
-      pOpts->host = "seedb1.celllinkseed.io";// -h
-      pOpts->ns = "dnsb1.celllinkseed.io";// -n
-      pOpts->mbox = "alibuybuy@yandex.com"; // -m
-
-      pOpts->seeds.push_back("120.92.85.97");
-      //pOpts->seeds.push_back("11.22.33.44");// test data
-
-      pOpts->InitMessageStart();
-
-      MCAddrDB* pdb = new MCAddrDB(pOpts);
-      pdb->LoadDBData();
-      AddNewDB(*pdb);
-      StartSeederThread(*pdb, true);
-  }
-  */
   if (g_configgilename == nullptr)
   {
       printf("g_configgilename is null");
@@ -692,8 +636,6 @@ int main(int argc, char **argv) {
           continue;
       }
       printf("running branch %s\n", opts->branchid.c_str());
-
-      opts->fUseTestNet = fTestNet;
       opts->InitMessageStart();
 
       MCAddrDB* pdb = new MCAddrDB(opts);

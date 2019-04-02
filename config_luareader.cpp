@@ -53,6 +53,7 @@ bool ConfigLuaReader::ReadConfig(const char* filename, vector<MCDnsSeedOpts*> &v
             if (!lua_isstring(L, -1)) { printf("miss branchid\n"); return false; }
             opt->branchid.assign(lua_tostring(L, -1));
             lua_pop(L, 1);
+            printf("reading config from branch %s\n", opt->branchid.c_str());
         }
         {
             lua_getfield(L, -1, "defaultport");
@@ -111,6 +112,17 @@ bool ConfigLuaReader::ReadConfig(const char* filename, vector<MCDnsSeedOpts*> &v
                 std::string strSeed(confseed);
                 opt->seeds.push_back(strSeed);
                 lua_pop(L, 1);
+            }
+
+            lua_pop(L, 1);
+        }
+        {
+            lua_getfield(L, -1, "testnet");
+            if (lua_isboolean(L, -1)) {
+                opt->fUseTestNet = lua_toboolean(L, -1);
+                if (opt->fUseTestNet){
+                    printf("use testnet\n");
+                }
             }
 
             lua_pop(L, 1);

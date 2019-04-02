@@ -16,12 +16,11 @@
 
 #define REQUIRE_VERSION 70001
 
-//TODO: 主网和测试网络的主链、支链（不同的支链也不同）,so is need to modify the GetRequireHeight func.
+//TODO: main testnet and branch have diff height, so is need to modify the GetRequireHeight func.
 #define MAIN_NET_REQ_HEIGHT 200 //bitcoin 500000
-#define TEST_NET_REQ_HEIGHT 0 //bitcoin 350000
+#define TEST_NET_REQ_HEIGHT 10 //bitcoin 350000
 
-extern bool fTestNet;
-static inline int GetRequireHeight(const bool testnet = fTestNet)
+static inline int GetRequireHeight(const bool testnet)
 {
     return testnet ? TEST_NET_REQ_HEIGHT : MAIN_NET_REQ_HEIGHT;
 }
@@ -89,9 +88,10 @@ private:
   std::string clientSubVersion;
 
   unsigned short defaultport;//config default mgc node port(diff chain diff port)
+  bool fUseTestNet;
 public:
   MCAddrInfo() : services(0), lastTry(0), ourLastTry(0), ourLastSuccess(0), 
-      ignoreTill(0), clientVersion(0), blocks(0), total(0), success(0), defaultport(0){}
+      ignoreTill(0), clientVersion(0), blocks(0), total(0), success(0), defaultport(0), fUseTestNet(false){}
   
   MCAddrReport GetReport() const {
     MCAddrReport ret;
@@ -127,7 +127,7 @@ public:
         printf("not good for client version %d\n", clientVersion);
         return false;
     }
-    if (blocks && blocks < GetRequireHeight()) {
+    if (blocks && blocks < GetRequireHeight(fUseTestNet)) {
         printf("not good for require height %d\n", blocks);
         return false;
     }
@@ -323,6 +323,7 @@ public:
         for (int i=0; i<n; i++) {
           MCAddrInfo info;
           info.defaultport = db->pOpts->defaultport;
+          info.fUseTestNet = db->pOpts->fUseTestNet;
           READWRITE(info);
           if (!info.GetBanTime()) {
             int id = db->nId++;

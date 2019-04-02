@@ -23,8 +23,6 @@
 --,pchMessageStart={}
 --mainchain
 
---testnet
-
 seederconfig={
 --main
 { branchid="main",
@@ -34,6 +32,15 @@ seederconfig={
   ns="dns.celllinkseed.io",
   mbox="alibuybuy@yandex.com",
   seeds={"main.celllinkseed.io","seed.magnachainseed.io"}, --"120.92.85.97", do not hard code the ip
+},
+{ branchid="main",
+  testnet=true,
+  defaultport=18833,
+  nThreads=2,
+  host="seedtest.celllinkseed.io",
+  ns="dns.celllinkseed.io",
+  mbox="alibuybuy@yandex.com",
+  seeds={"seedtest.celllinkseed.io",},
 },
 --branch
 --[[
