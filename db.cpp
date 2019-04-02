@@ -246,10 +246,12 @@ int StatCompare(const MCAddrReport& a, const MCAddrReport& b) {
 
 void MCAddrDB::SaveDBData()
 {
-    std::string dbfilename = strprintf("dnsseed_%s.dat", pOpts->branchid.c_str());
-    std::string dbfilenamenew = strprintf("dnsseed_%s.dat.new", pOpts->branchid.c_str());
-    std::string dbfilenamedump = strprintf("dnsseed_%s.dump", pOpts->branchid.c_str());
-    std::string dblogfile = strprintf("dnsstats_%s.log", pOpts->branchid.c_str());
+    std::string key = pOpts->branchid;
+    key += pOpts->fUseTestNet ? "testnet" : "";
+    std::string dbfilename = strprintf("dnsseed_%s.dat", key.c_str());
+    std::string dbfilenamenew = strprintf("dnsseed_%s.dat.new", key.c_str());
+    std::string dbfilenamedump = strprintf("dnsseed_%s.dump", key.c_str());
+    std::string dblogfile = strprintf("dnsstats_%s.log", key.c_str());
 
     vector<MCAddrReport> v = this->GetAll();
     std::sort(v.begin(), v.end(), StatCompare);
