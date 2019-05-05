@@ -69,6 +69,6 @@ void MCDnsSeedOpts::PrintWhitelistFilter()
 
 string MCDnsSeedOpts::ShortName()
 {
-    string strShortName = branchid.substr(0, 8) + std::string(host, std::min(strlen(host), (size_t)8));
+    string strShortName = branchid.substr(0, 8) + string(":") + string(host, std::min(strlen(host), (size_t)8));
     return strShortName;
 }
