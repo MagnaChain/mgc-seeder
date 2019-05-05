@@ -108,7 +108,7 @@ void MCAddrDB::Bad_(const MCService &addr, int ban)
     if (ban < ter) ban = ter;
   }
   if (ban > 0) {
-//    printf("%s: ban for %i seconds\n", ToString(addr).c_str(), ban);
+    printf("%s: ban for %i seconds\n", ToString(addr).c_str(), ban);
     banned[info.ip] = ban + now;
     ipToId.erase(info.ip);
     goodId.erase(id);
