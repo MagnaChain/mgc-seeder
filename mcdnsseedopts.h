@@ -33,6 +33,7 @@ public:
 
     void InitMessageStart();
     void PrintWhitelistFilter();
+    string ShortName();
 };
 
 #endif

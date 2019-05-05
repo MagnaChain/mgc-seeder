@@ -1,4 +1,6 @@
 #include "mcdnsseedopts.h"
+#include <string.h>
+#include <algorithm>
 
 MCDnsSeedOpts::MCDnsSeedOpts() :
     nThreads(96), nDnsThreads(4), nPort(53), mbox(NULL), ns(NULL), host(NULL)
@@ -63,4 +65,10 @@ void MCDnsSeedOpts::PrintWhitelistFilter()
         printf("0x%lx", (unsigned long)*it);
     }
     printf("\n");
+}
+
+string MCDnsSeedOpts::ShortName()
+{
+    string strShortName = branchid.substr(0, 8) + std::string(host, std::min(strlen(host), (size_t)8));
+    return strShortName;
 }

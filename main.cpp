@@ -202,7 +202,7 @@ void AddNewDB(MCAddrDB &db)
 
 extern "C" void* ThreadCrawler(void* data) {
   MCAddrDB* pDB = (MCAddrDB*)data;
-  RenameThread(strprintf("Crawler%s", pDB->pOpts->branchid.substr(0, 8).c_str()).c_str());
+  RenameThread(strprintf("Crawler%s", pDB->pOpts->ShortName().c_str()).c_str());
   MCDnsSeedOpts* pOpts = pDB->pOpts;
   int nThreads = pOpts->nThreads;
   do {
@@ -437,7 +437,7 @@ extern "C" void* ThreadDNS(void* arg) {
 
 extern "C" void* ThreadDumper(void*pData) {
   MCAddrDB* pDB = (MCAddrDB*)pData;
-  RenameThread(strprintf("Dumper_%s", pDB->pOpts->branchid.substr(0, 8).c_str()).c_str());
+  RenameThread(strprintf("Dumper_%s", pDB->pOpts->ShortName().c_str()).c_str());
   int count = 0;
   do {
     Sleep(100000 << count); // First 100s, than 200s, 400s, 800s, 1600s, and then 3200s forever
@@ -452,14 +452,14 @@ extern "C" void* ThreadDumper(void*pData) {
 
 extern "C" void* ThreadStats(void*pData) {
   MCAddrDB* pDB = (MCAddrDB*)pData;
-  RenameThread(strprintf("Stats_%s", pDB->pOpts->branchid.substr(0, 8).c_str()).c_str());
+  RenameThread(strprintf("Stats_%s", pDB->pOpts->ShortName().c_str()).c_str());
   bool first = true;
-  std::string strShortName = pDB->pOpts->branchid.substr(0, 8).c_str();
+  std::string strShortName = pDB->pOpts->ShortName();
   do {
-    char c[256];
+    char ftime[256];
     time_t tim = time(NULL);
     struct tm *tmp = localtime(&tim);
-    strftime(c, 256, "[%y-%m-%d %H:%M:%S]", tmp);
+    strftime(ftime, 256, "[%y-%m-%d %H:%M:%S]", tmp);
     MCAddrDBStats stats;
     pDB->GetStats(stats);
     if (first)
@@ -478,8 +478,8 @@ extern "C" void* ThreadStats(void*pData) {
       requests += dnsThread[i]->dns_opt.nRequests;//OP: this may be can keep this
       queries += dnsThread[i]->dbQueries;
     }
-    printf("%s %i/%i available (%i tried in %is, %i new, %i active), %i banned; %llu DNS requests, %llu db queries, branchid %s\n", 
-        c, stats.nGood, stats.nAvail, stats.nTracked, stats.nAge, stats.nNew, stats.nAvail - stats.nTracked - stats.nNew, 
+    printf("%s good/avai %i/%i (%i tried in %is, %i new, %i active), %i banned; %llu DNS req, %llu db queries, branchid %s %s\n", 
+        ftime, stats.nGood, stats.nAvail, stats.nTracked, stats.nAge, stats.nNew, stats.nAvail - stats.nTracked - stats.nNew, 
         stats.nBanned, (unsigned long long)requests, (unsigned long long)queries, strShortName.c_str());
     Sleep(5000);
   } while(1);
@@ -492,7 +492,7 @@ extern "C" void* ThreadStats(void*pData) {
 
 extern "C" void* ThreadSeeder(void*pData) {
   MCAddrDB* pDB = (MCAddrDB*)pData;
-  RenameThread(strprintf("Seeder_%s", pDB->pOpts->branchid.substr(0, 8).c_str()).c_str());
+  RenameThread(strprintf("Seeder_%s", pDB->pOpts->ShortName().c_str()).c_str());
   if (!pDB->pOpts->fUseTestNet){
     //db.Add(MCService("kjy2eqzk4zwi5zd3.onion", 8833), true);
   }
