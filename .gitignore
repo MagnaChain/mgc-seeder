@@ -1,3 +1,7 @@
 *.o
 dnsseed*
 dnsstats.log
+
+.vs/
+seeder.vcxproj.user
+

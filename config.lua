@@ -40,7 +40,7 @@ seederconfig={
   host="seedtest.celllinkseed.io",
   ns="dns.celllinkseed.io",
   mbox="alibuybuy@yandex.com",
-  seeds={"seedtest.celllinkseed.io",},
+  seeds={"main.celllinkseed.io",},
 },
 --branch
 --[[
