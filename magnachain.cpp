@@ -149,7 +149,7 @@ class MCNode {
 
       vector<MCAddress> vAddrNew;
       vRecv >> vAddrNew;
-      printf("%s: got %i addresses\n", branchid.c_str(), (int)vAddrNew.size());
+      printf("%s: got %i addresses\n", ToString(you).c_str(), (int)vAddrNew.size());
       for (int i=0; i< vAddrNew.size();i++) {
         printf("%s\n", vAddrNew[i].ToString().c_str());
       }
@@ -168,7 +168,10 @@ class MCNode {
         }
         if (addr.nTime > now - 604800) {
           vAddr->push_back(addr);
-          printf("%s %s: added address %s (#%i)\n", ftime, branchid.c_str(), addr.ToString().c_str(), (int)(vAddr->size()));
+          printf("%s %s: added address %s (#%i)\n", ftime, ToString(you).c_str(), addr.ToString().c_str(), (int)(vAddr->size()));
+        }
+        else {
+          printf("%s %s: not added address %s, addr.nTime %d\n", ftime, ToString(you).c_str(), addr.ToString().c_str(), addr.nTime);
         }
         if (vAddr->size() > 1000) {doneAfter = 1; return true; }
       }
