@@ -353,6 +353,7 @@ bool MCNetAddr2addr_t(MCNetAddr &na, addr_t& a)
 }
 
 extern "C" int GetIPList(void *data, char *requestedHostname, addr_t* addr, int max, int ipv4, int ipv6) {
+  const int initmax = max;
   MCDnsThread *thread = (MCDnsThread*)data;
 
   std::string strReqHostName = requestedHostname;
@@ -391,6 +392,13 @@ extern "C" int GetIPList(void *data, char *requestedHostname, addr_t* addr, int 
     max = size;
   if (max > maxmax)
     max = maxmax;
+  // log
+  char ftime[256];
+  time_t tim = time(NULL);
+  struct tm *tmp = localtime(&tim);
+  strftime(ftime, 256, "[%y-%m-%d %H:%M:%S]", tmp);
+  printf("$s GetIPList size %d, maxmax %d, max %d\n", ftime, size, maxmax, max);
+  //
   int i=0;
   while (i<max) {
     int j = i + (rand() % (size - i));
@@ -408,20 +416,24 @@ extern "C" int GetIPList(void *data, char *requestedHostname, addr_t* addr, int 
     i++;
   }
   //force add
-  if (size == 0)
+  if (max == 0)
   {
+      int forceadd = 0;
       for (const std::string& seed : pDB->pOpts->seeds /*int i = 0; i < pDB->pOpts->seeds.size(); i++*/) {
           vector<MCNetAddr> ips;
           LookupHost(seed.c_str(), ips);
           for (vector<MCNetAddr>::iterator it = ips.begin(); it != ips.end(); it++) {
-              if (MCNetAddr2addr_t(*it, addr[0]))
+              if (MCNetAddr2addr_t(*it, addr[forceadd]))
               {
-                  printf("force add ip,ignore isgood.%s\n", seed.c_str());
-                  return 1;
+                  printf("force add ip.%s\n", seed.c_str());
+                  forceadd++;
+                  if (forceadd >= initmax)
+                      return forceadd;
               }
-              
           }
       }
+      printf("force add ip num %d\n", forceadd);
+      return forceadd;
   }
   return max;
 }
@@ -455,7 +467,9 @@ extern "C" void* ThreadStats(void*pData) {
   RenameThread(strprintf("Stats_%s", pDB->pOpts->ShortName().c_str()).c_str());
   bool first = true;
   std::string strShortName = pDB->pOpts->ShortName();
+  unsigned int runcount = 0;
   do {
+    runcount++;
     char ftime[256];
     time_t tim = time(NULL);
     struct tm *tmp = localtime(&tim);
@@ -478,9 +492,10 @@ extern "C" void* ThreadStats(void*pData) {
       requests += dnsThread[i]->dns_opt.nRequests;//OP: this may be can keep this
       queries += dnsThread[i]->dbQueries;
     }
-    printf("%s good/avai %i/%i (%i tried in %is, %i new, %i active), %i banned; %llu DNS req, %llu db queries, branchid %s\n", 
-        ftime, stats.nGood, stats.nAvail, stats.nTracked, stats.nAge, stats.nNew, stats.nAvail - stats.nTracked - stats.nNew, 
-        stats.nBanned, (unsigned long long)requests, (unsigned long long)queries, strShortName.c_str());
+    if (runcount%10 == 0)
+      printf("%s good/avai %i/%i (%i tried in %is, %i new, %i active), %i banned; %llu DNS req, %llu db queries, branchid %s\n", 
+          ftime, stats.nGood, stats.nAvail, stats.nTracked, stats.nAge, stats.nNew, stats.nAvail - stats.nTracked - stats.nNew, 
+          stats.nBanned, (unsigned long long)requests, (unsigned long long)queries, strShortName.c_str());
     Sleep(5000);
   } while(1);
   return nullptr;
