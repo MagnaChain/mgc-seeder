@@ -397,7 +397,7 @@ extern "C" int GetIPList(void *data, char *requestedHostname, addr_t* addr, int 
   time_t tim = time(NULL);
   struct tm *tmp = localtime(&tim);
   strftime(ftime, 256, "[%y-%m-%d %H:%M:%S]", tmp);
-  printf("$s GetIPList size %d, maxmax %d, max %d\n", ftime, size, maxmax, max);
+  printf("%s GetIPList size %d, maxmax %d, max %d\n", ftime, size, maxmax, max);
   //
   int i=0;
   while (i<max) {
