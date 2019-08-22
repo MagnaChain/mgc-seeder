@@ -470,10 +470,6 @@ extern "C" void* ThreadStats(void*pData) {
   unsigned int runcount = 0;
   do {
     runcount++;
-    char ftime[256];
-    time_t tim = time(NULL);
-    struct tm *tmp = localtime(&tim);
-    strftime(ftime, 256, "[%y-%m-%d %H:%M:%S]", tmp);
     MCAddrDBStats stats;
     pDB->GetStats(stats);
     if (first)
@@ -493,6 +489,10 @@ extern "C" void* ThreadStats(void*pData) {
       queries += dnsThread[i]->dbQueries;
     }
     if (runcount%10 == 0)
+      char ftime[256];
+      time_t tim = time(NULL);
+      struct tm *tmp = localtime(&tim);
+      strftime(ftime, 256, "[%y-%m-%d %H:%M:%S]", tmp);
       printf("%s good/avai %i/%i (%i tried in %is, %i new, %i active), %i banned; %llu DNS req, %llu db queries, branchid %s\n", 
           ftime, stats.nGood, stats.nAvail, stats.nTracked, stats.nAge, stats.nNew, stats.nAvail - stats.nTracked - stats.nNew, 
           stats.nBanned, (unsigned long long)requests, (unsigned long long)queries, strShortName.c_str());
@@ -561,10 +561,10 @@ void InitCommonOptions(int argc, char **argv)
 void StartSeederThread(MCAddrDB &db, bool fend)
 {
     pthread_t threadSeed, threadDump, threadStats;
-    printf("Starting seeder...");
+    printf("Starting seeder...\n");
     pthread_create(&threadSeed, NULL, ThreadSeeder, &db);
     printf("done\n");
-    printf("Starting %i crawler threads...", db.pOpts->nThreads);
+    printf("Starting %i crawler threads...\n", db.pOpts->nThreads);
     pthread_attr_t attr_crawler;
     pthread_attr_init(&attr_crawler);
     pthread_attr_setstacksize(&attr_crawler, 0x20000);
@@ -613,7 +613,7 @@ int main(int argc, char **argv) {
 
   if (g_configgilename == nullptr)
   {
-      printf("g_configgilename is null");
+      printf("g_configgilename is null\n");
       return 1;
   }
 

@@ -142,9 +142,14 @@ class MCNode {
     }
     
     if (strCommand == "addr" && vAddr) {
+        char ftime[256];
+        time_t tim = time(NULL);
+        struct tm *tmp = localtime(&tim);
+        strftime(ftime, 256, "[%y-%m-%d %H:%M:%S]", tmp);
+
       vector<MCAddress> vAddrNew;
       vRecv >> vAddrNew;
-      printf("%s: got %i addresses\n", ToString(you).c_str(), (int)vAddrNew.size());
+      printf("%s: got %i addresses\n", branchid.c_str(), (int)vAddrNew.size());
       for (int i=0; i< vAddrNew.size();i++) {
         printf("%s\n", vAddrNew[i].ToString().c_str());
       }
@@ -157,12 +162,14 @@ class MCNode {
         MCAddress &addr = *it;
 //        printf("%s: got address %s\n", ToString(you).c_str(), addr.ToString().c_str(), (int)(vAddr->size()));
         it++;
-        if (addr.nTime <= 100000000 || addr.nTime > now + 600)
+        if (addr.nTime <= 100000000 || addr.nTime > now + 600) {
+          printf("%s %s addr.nTime:%d\n", ftime, addr.ToString().c_str(), addr.nTime);
           addr.nTime = now - 5 * 86400;
+        }
         if (addr.nTime > now - 604800) {
           vAddr->push_back(addr);
-          printf("%s: added address %s (#%i)\n", ToString(you).c_str(), addr.ToString().c_str(), (int)(vAddr->size()));
-	}
+          printf("%s %s: added address %s (#%i)\n", ftime, branchid.c_str(), addr.ToString().c_str(), (int)(vAddr->size()));
+        }
         if (vAddr->size() > 1000) {doneAfter = 1; return true; }
       }
       return false;
