@@ -488,7 +488,7 @@ extern "C" void* ThreadStats(void*pData) {
       requests += dnsThread[i]->dns_opt.nRequests;//OP: this may be can keep this
       queries += dnsThread[i]->dbQueries;
     }
-    if (runcount%10 == 0)
+    if (runcount%10 == 0) {
       char ftime[256];
       time_t tim = time(NULL);
       struct tm *tmp = localtime(&tim);
@@ -496,6 +496,7 @@ extern "C" void* ThreadStats(void*pData) {
       printf("%s good/avai %i/%i (%i tried in %is, %i new, %i active), %i banned; %llu DNS req, %llu db queries, branchid %s\n", 
           ftime, stats.nGood, stats.nAvail, stats.nTracked, stats.nAge, stats.nNew, stats.nAvail - stats.nTracked - stats.nNew, 
           stats.nBanned, (unsigned long long)requests, (unsigned long long)queries, strShortName.c_str());
+    }
     Sleep(5000);
   } while(1);
   return nullptr;
