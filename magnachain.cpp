@@ -144,7 +144,10 @@ class MCNode {
     if (strCommand == "addr" && vAddr) {
       vector<MCAddress> vAddrNew;
       vRecv >> vAddrNew;
-      // printf("%s: got %i addresses\n", ToString(you).c_str(), (int)vAddrNew.size());
+      printf("%s: got %i addresses\n", ToString(you).c_str(), (int)vAddrNew.size());
+      for (int i=0; i< vAddrNew.size();i++) {
+        printf("%s\n", vAddrNew[i].ToString().c_str());
+      }
       int64 now = time(NULL);
       vector<MCAddress>::iterator it = vAddrNew.begin();
       if (vAddrNew.size() > 1) {
@@ -156,9 +159,10 @@ class MCNode {
         it++;
         if (addr.nTime <= 100000000 || addr.nTime > now + 600)
           addr.nTime = now - 5 * 86400;
-        if (addr.nTime > now - 604800)
+        if (addr.nTime > now - 604800) {
           vAddr->push_back(addr);
-//        printf("%s: added address %s (#%i)\n", ToString(you).c_str(), addr.ToString().c_str(), (int)(vAddr->size()));
+          printf("%s: added address %s (#%i)\n", ToString(you).c_str(), addr.ToString().c_str(), (int)(vAddr->size()));
+	}
         if (vAddr->size() > 1000) {doneAfter = 1; return true; }
       }
       return false;
@@ -250,7 +254,10 @@ public:
       }
       int ret = select(sock+1, &set, NULL, &set, &wa);
       if (ret != 1) {
-        if (!doneAfter) res = false;
+        if (!doneAfter) {
+		res = false;
+		printf("%s: BAD (testnode select fail)\n", ToString(you).c_str());
+	}
         break;
       }
       int nBytes = recv(sock, pchBuf, sizeof(pchBuf), 0);
@@ -259,11 +266,11 @@ public:
         vRecv.resize(nPos + nBytes);
         memcpy(&vRecv[nPos], pchBuf, nBytes);
       } else if (nBytes == 0) {
-        // printf("%s: BAD (connection closed prematurely)\n", ToString(you).c_str());
+        printf("%s: BAD (connection closed prematurely)\n", ToString(you).c_str());
         res = false;
         break;
       } else {
-        // printf("%s: BAD (connection error)\n", ToString(you).c_str());
+        printf("%s: BAD (connection error)\n", ToString(you).c_str());
         res = false;
         break;
       }
