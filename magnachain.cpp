@@ -150,7 +150,7 @@ class MCNode {
       vector<MCAddress> vAddrNew;
       vRecv >> vAddrNew;
       printf("%s: got %i addresses\n", ToString(you).c_str(), (int)vAddrNew.size());
-      for (int i=0; i< vAddrNew.size();i++) {
+      for (size_t i=0; i< std::min(vAddrNew.size(), (size_t)5);i++) {
         printf("%s\n", vAddrNew[i].ToString().c_str());
       }
       int64 now = time(NULL);
@@ -197,13 +197,14 @@ class MCNode {
       MCMessageHeader hdr(pchMessageStart);
       vRecv >> hdr;
       if (!hdr.IsValid()) { 
-        // printf("%s: BAD (invalid header)\n", ToString(you).c_str());
-        ban = 100000; return true;
+        printf("%s:%d %s: BAD ban (invalid header)\n", __FILE__, __LINE__, ToString(you).c_str());
+        ban = 100000; 
+        return true;
       }
       string strCommand = hdr.GetCommand();
       unsigned int nMessageSize = hdr.nMessageSize;
       if (nMessageSize > MAX_SIZE) { 
-        // printf("%s: BAD (message too large)\n", ToString(you).c_str());
+        printf("%s:%d %s: BAD ban (message too large)\n", __FILE__, __LINE__, ToString(you).c_str());
         ban = 100000;
         return true; 
       }
@@ -245,7 +246,10 @@ public:
   }
   bool Run() {
     bool res = true;
-    if (!ConnectSocket(you, sock)) return false;
+    if (!ConnectSocket(you, sock)) {
+        printf("%s: Run BAD ConnectSocket fail\n", ToString(you).c_str());
+        return false;
+    }
     PushVersion();
     Send();
     int64 now;
@@ -265,9 +269,9 @@ public:
       int ret = select(sock+1, &set, NULL, &set, &wa);
       if (ret != 1) {
         if (!doneAfter) {
-		res = false;
-		printf("%s: BAD (testnode select fail)\n", ToString(you).c_str());
-	}
+		  res = false;
+		  printf("%s: Run BAD (testnode select fail)\n", ToString(you).c_str());
+	    }
         break;
       }
       int nBytes = recv(sock, pchBuf, sizeof(pchBuf), 0);
@@ -276,18 +280,21 @@ public:
         vRecv.resize(nPos + nBytes);
         memcpy(&vRecv[nPos], pchBuf, nBytes);
       } else if (nBytes == 0) {
-        printf("%s: BAD (connection closed prematurely)\n", ToString(you).c_str());
+        printf("%s: Run BAD (connection closed prematurely)\n", ToString(you).c_str());
         res = false;
         break;
       } else {
-        printf("%s: BAD (connection error)\n", ToString(you).c_str());
+        printf("%s: Run BAD (connection error)\n", ToString(you).c_str());
         res = false;
         break;
       }
       ProcessMessages();
       Send();
     }
-    if (sock == INVALID_SOCKET) res = false;
+    if (sock == INVALID_SOCKET) {
+        printf("%s: Run BAD invalid socket\n", ToString(you).c_str());
+        res = false;
+    }
     close(sock);
     sock = INVALID_SOCKET;
     return (ban == 0) && res;
@@ -322,7 +329,7 @@ bool TestNode(const MCService &cip, int &ban, int &clientV, std::string &clientS
     clientV = node.GetClientVersion();
     clientSV = node.GetClientSubVersion();
     blocks = node.GetStartingHeight();
-//  printf("%s: %s!!!\n", cip.ToString().c_str(), ret ? "GOOD" : "BAD");
+    printf("%s:%d %s: %s!!!\n", __FILE__, __LINE__, cip.ToString().c_str(), ret ? "GOOD" : "BAD");
     return ret;
   } catch(std::ios_base::failure& e) {
     ban = 0;
