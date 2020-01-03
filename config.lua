@@ -31,7 +31,7 @@ seederconfig={
   host="seed.celllinkseed.io",
   ns="dns.celllinkseed.io",
   mbox="alibuybuy@yandex.com",
-  seeds={"main.celllinkseed.io","seed.magnachainseed.io"}, --"120.92.85.97", do not hard code the ip
+  seeds={"main.celllinkseed.io","seed.magnachainseed.io", "124.156.166.31"}, --"120.92.85.97", do not hard code the ip
 },
 { branchid="main",
   testnet=true,
